@@ -6,10 +6,11 @@ import os
 from os import listdir as ls
 from os.path import isfile, join, isdir
 import subprocess
+from typing import Tuple
 
 """
 1-> usar os para escolher logo os ficheiros que estão na pasta ✔
-2-> Buscar mais ficheiros para testar o programa
+2-> Buscar mais ficheiros para testar o programa ✔
 """
 
 DNA_CODONS = {
@@ -47,7 +48,7 @@ def path_standart() -> dict:
 	
 	return {n:filum  for n, filum in enumerate(ls(data_folder), 1) if filum.endswith('.fa') or filum.endswith('.fasta') }
 
-def reading_frame() -> list:
+def reading_frame() -> Tuple[str, list]:
     """
     Definir o reading frame da sequencia que queremos ler sendo 0 'usual'
     """
@@ -65,7 +66,7 @@ def reading_frame() -> list:
     
     seq = seq[::-1] if shift < 0 else seq
     
-    return [seq[i : i+3] for i in range(abs(shift), len(seq) + shift, 3)]
+    return seq_id, [seq[i : i+3] for i in range(abs(shift), len(seq) + shift, 3)]
 
 
 def sequence_translation(sequence : list) -> str:
@@ -75,15 +76,28 @@ def sequence_translation(sequence : list) -> str:
     """
     a_a = [DNA_CODONS[cod] for cod in sequence if cod in DNA_CODONS.keys()]
 
+    def metionine_replacerinator() -> None:
+        start_count = 0
+        switch = lambda x: x.replace('_Start_', 'M')
+        for n,i in enumerate(a_a):
+            if i == '_Start_' and start_count == 0:
+                start_count +=1
+
+            elif i == '_Start_' and start_count == 1:
+                a_a[n] = switch(i)
+
+    metionine_replacerinator()
+
     return '-'.join(a_a)
 
 def main():
     subprocess.run('clear')
     only_files = path_standart()
     [print(count, '-', i) for count, i in only_files.items()]
-    sequence = reading_frame()
+    seq_id , sequence = reading_frame()
     translation = sequence_translation(sequence)
-    print(translation)
+    subprocess.run('clear')
+    print(f'Sequence translated: {seq_id}\n{translation}')
 
 if __name__ == "__main__":
     main()
